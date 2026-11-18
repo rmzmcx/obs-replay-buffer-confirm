@@ -29,13 +29,13 @@ Restart OBS. Portable mode ignores this directory.
 Settings → General → Output, tick "Show confirmation dialog when stopping the replay buffer",
 right below "Show confirmation dialog when stopping recording".
 
-<img src="docs/images/ReplayBufferConfirmOption_en-US.png" width="640" alt="The checkbox in the settings dialog">
+<img src="docs/images/ReplayBufferConfirmOption_en-US.png" width="900" alt="The checkbox in the settings dialog">
 
 Once enabled, clicking "Stop Replay Buffer" on the main window or the matching tray item asks
 first, with "No" as the default button. When the main window is hidden to the tray, it stops
 without asking, matching how OBS confirms recording.
 
-<img src="docs/images/ReplayBufferConfirmWindow_en-US.png" width="420" alt="The confirmation dialog">
+<img src="docs/images/ReplayBufferConfirmWindow_en-US.png" width="502" alt="The confirmation dialog">
 
 The toggle lives in `%AppData%\obs-studio\plugin_config\obs-replay-buffer-confirm\settings.json`.
 

@@ -25,12 +25,12 @@ plugins\obs-replay-buffer-confirm\data\locale\zh-CN.ini
 
 设置 → 常规 → 输出，勾选「关闭回放缓存时弹窗确认」，位置在「停止录制时弹窗确认」下方。
 
-<img src="docs/images/ReplayBufferConfirmOption_zh-CN.png" width="640" alt="设置页里的勾选项">
+<img src="docs/images/ReplayBufferConfirmOption_zh-CN.png" width="900" alt="设置页里的勾选项">
 
 开启后点主界面的「关闭回放缓存」，或系统托盘里的同名项，会先弹确认框，默认停在「否」。
 主窗口最小化到托盘时不弹窗，直接停止，和 OBS 的停止录制确认一致。
 
-<img src="docs/images/ReplayBufferConfirmWindow_zh-CN.png" width="420" alt="确认框">
+<img src="docs/images/ReplayBufferConfirmWindow_zh-CN.png" width="502" alt="确认框">
 
 开关存在 `%AppData%\obs-studio\plugin_config\obs-replay-buffer-confirm\settings.json`。
 
