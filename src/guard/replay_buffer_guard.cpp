@@ -12,7 +12,6 @@
 #include <QKeyEvent>
 #include <QMainWindow>
 #include <QMenu>
-#include <QMenuBar>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QPushButton>
@@ -91,45 +90,34 @@ ReplayBufferGuard::ReplayBufferGuard(QMainWindow *mainWindow)
 	  m_mainWindow(mainWindow),
 	  m_confirmEnabled(plugin_config::LoadConfirmEnabled())
 {
-	buildMenu();
 	attachStopButton();
 	attachTrayAction();
 	qApp->installEventFilter(this);
-	refreshControls();
 }
 
 ReplayBufferGuard::~ReplayBufferGuard()
 {
+	prepareShutdown();
 	qApp->removeEventFilter(this);
-	if (m_menu) {
-		if (m_mainWindow && m_mainWindow->menuBar())
-			m_mainWindow->menuBar()->removeAction(m_menu->menuAction());
-		delete m_menu;
-		m_menu = nullptr;
-	}
 }
 
 void ReplayBufferGuard::attachLate()
 {
+	if (m_shuttingDown)
+		return;
 	attachStopButton();
 	attachTrayAction();
 }
 
-void ReplayBufferGuard::buildMenu()
+// 主窗口析构期间 Qt 仍会派发信号，此时触碰界面或主窗口的动作都要停下。
+void ReplayBufferGuard::prepareShutdown()
 {
-	if (!m_mainWindow || !m_mainWindow->menuBar())
-		return;
-
-	m_menu = m_mainWindow->menuBar()->addMenu(obs_module_text("Menu.Title"));
-	m_menuToggle = m_menu->addAction(obs_module_text("Menu.ConfirmOnStop"));
-	m_menuToggle->setCheckable(true);
-	m_menuToggle->setChecked(m_confirmEnabled);
-	connect(m_menuToggle, &QAction::toggled, this, [this](bool on) { setConfirmEnabled(on, true); });
+	m_shuttingDown = true;
 }
 
 void ReplayBufferGuard::attachStopButton()
 {
-	if (m_stopButtonAttached)
+	if (m_stopButtonAttached || m_shuttingDown || !m_mainWindow)
 		return;
 
 	auto *button = m_mainWindow->findChild<QPushButton *>(kStopButtonName);
@@ -144,7 +132,7 @@ void ReplayBufferGuard::attachStopButton()
 
 void ReplayBufferGuard::attachTrayAction()
 {
-	if (m_trayAttached)
+	if (m_trayAttached || m_shuttingDown || !m_mainWindow)
 		return;
 
 	auto *tray = m_mainWindow->findChild<QSystemTrayIcon *>();
@@ -178,8 +166,11 @@ void ReplayBufferGuard::attachTrayAction()
 		return;
 	}
 
+	// 托盘项是多播信号，不断开原连接就没法在停止前插入确认。
 	QObject::disconnect(target, nullptr, nullptr, nullptr);
 	connect(target, &QAction::triggered, this, [this] {
+		if (m_shuttingDown || !m_mainWindow)
+			return;
 		if (obs_frontend_replay_buffer_active())
 			activate();
 		else
@@ -229,6 +220,9 @@ void ReplayBufferGuard::injectSettingsPage(QWidget *dialog)
 
 void ReplayBufferGuard::setConfirmEnabled(bool enabled, bool persist)
 {
+	if (m_shuttingDown)
+		return;
+
 	m_confirmEnabled = enabled;
 	refreshControls();
 	if (persist)
@@ -237,10 +231,6 @@ void ReplayBufferGuard::setConfirmEnabled(bool enabled, bool persist)
 
 void ReplayBufferGuard::refreshControls()
 {
-	if (m_menuToggle) {
-		const QSignalBlocker blocker(m_menuToggle);
-		m_menuToggle->setChecked(m_confirmEnabled);
-	}
 	if (m_pageToggle) {
 		const QSignalBlocker blocker(m_pageToggle);
 		m_pageToggle->setChecked(m_confirmEnabled);
@@ -249,15 +239,24 @@ void ReplayBufferGuard::refreshControls()
 
 bool ReplayBufferGuard::askConfirmation()
 {
-	const auto answer =
-		QMessageBox::question(m_mainWindow, obs_module_text("Confirm.Title"),
-				      obs_module_text("Confirm.Text"), QMessageBox::Yes | QMessageBox::No,
-				      QMessageBox::No);
-	return answer == QMessageBox::Yes;
+	// 标准按钮的文案来自 Qt 的翻译包，OBS 没随包附带，会显示英文 yes/no。
+	QMessageBox box(m_mainWindow);
+	box.setIcon(QMessageBox::Question);
+	box.setWindowTitle(obs_module_text("Confirm.Title"));
+	box.setText(obs_module_text("Confirm.Text"));
+
+	auto *confirmButton = box.addButton(obs_module_text("Confirm.Yes"), QMessageBox::YesRole);
+	auto *cancelButton = box.addButton(obs_module_text("Confirm.No"), QMessageBox::NoRole);
+	box.setDefaultButton(cancelButton);
+	box.exec();
+
+	return box.clickedButton() == confirmButton;
 }
 
 void ReplayBufferGuard::activate()
 {
+	if (m_shuttingDown || !m_mainWindow)
+		return;
 	if (!obs_frontend_replay_buffer_active())
 		return;
 	if (m_confirmEnabled && m_mainWindow->isVisible() && !askConfirmation())
@@ -267,6 +266,9 @@ void ReplayBufferGuard::activate()
 
 bool ReplayBufferGuard::eventFilter(QObject *watched, QEvent *event)
 {
+	if (m_shuttingDown)
+		return false;
+
 	if (event->type() == QEvent::Show) {
 		auto *widget = qobject_cast<QWidget *>(watched);
 		if (widget && widget->inherits(kSettingsClass))

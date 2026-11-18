@@ -4,9 +4,9 @@
 #include <QObject>
 #include <QPointer>
 
-class QAction;
+#include <memory>
+
 class QMainWindow;
-class QMenu;
 class QWidget;
 
 class ReplayBufferGuard : public QObject {
@@ -15,12 +15,12 @@ public:
 	~ReplayBufferGuard() override;
 
 	void attachLate();
+	void prepareShutdown();
 
 protected:
 	bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
-	void buildMenu();
 	void attachStopButton();
 	void attachTrayAction();
 	void injectSettingsPage(QWidget *dialog);
@@ -29,11 +29,10 @@ private:
 	bool askConfirmation();
 	void activate();
 
-	QMainWindow *m_mainWindow = nullptr;
-	QMenu *m_menu = nullptr;
-	QAction *m_menuToggle = nullptr;
+	QPointer<QMainWindow> m_mainWindow;
 	QPointer<QCheckBox> m_pageToggle;
 	bool m_confirmEnabled = true;
 	bool m_stopButtonAttached = false;
 	bool m_trayAttached = false;
+	bool m_shuttingDown = false;
 };

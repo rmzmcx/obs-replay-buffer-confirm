@@ -16,9 +16,12 @@ static void frontendEvent(enum obs_frontend_event event, void *data)
 	if (!guard)
 		return;
 
-	// 系统托盘与部分控件在插件加载之后才建好，加载完成时再挂一次。
-	if (event == OBS_FRONTEND_EVENT_FINISHED_LOADING)
+	if (event == OBS_FRONTEND_EVENT_FINISHED_LOADING) {
+		// 系统托盘与部分控件在插件加载之后才建好，加载完成时再挂一次。
 		guard->attachLate();
+	} else if (event == OBS_FRONTEND_EVENT_EXIT) {
+		guard->prepareShutdown();
+	}
 }
 
 bool obs_module_load(void)
@@ -39,6 +42,7 @@ void obs_module_unload(void)
 {
 	if (g_guard) {
 		obs_frontend_remove_event_callback(frontendEvent, g_guard);
+		g_guard->prepareShutdown();
 		delete g_guard;
 		g_guard = nullptr;
 	}
