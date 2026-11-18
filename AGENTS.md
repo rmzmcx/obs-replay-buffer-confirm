@@ -77,3 +77,10 @@ cmd /c subst X: "E:\DSH-Work\OBS插件"
 
 部署：把 `release\obs-replay-buffer-confirm` 整个复制到 `C:\ProgramData\obs-studio\plugins\`，重启 OBS 生效。
 调试：OBS 安装目录的 `bin\64bit\obs64.exe` 作为调试目标，工作目录设为 `bin\64bit`。
+
+## 发布材料
+
+放在 `release/`，整个目录不入库：`RELEASE-x.y.z.md`、打好的 zip、`CHECKSUMS.txt`。
+版本变更的记录写在 `CHANGELOG.md` 里。
+
+打包时只清理 `release/obs-replay-buffer-confirm` 与同名 zip。整个 `release` 删掉会连说明文件一起没。
