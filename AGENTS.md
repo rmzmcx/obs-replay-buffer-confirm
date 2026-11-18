@@ -59,8 +59,21 @@ When you are writing, please
 
 ## 构建 / 部署 流程
 
-- 构建（在仓库根目录）：
-  `& 'E:\Microsoft Visual Studio\18\Community\MSBuild\Current\Bin\MSBuild.exe' obs-replay-buffer-confirm.sln /m /p:Configuration=Release /p:Platform=x64`
-- 产物在 `build/`
-- 安装：DLL 放进 OBS 的 `obs-plugins\64bit\`，插件数据放进 `data\obs-plugins\obs-replay-buffer-confirm\`
-- 调试：OBS 安装目录的 `bin\64bit\obs64.exe` 作为调试目标，工作目录设为 `bin\64bit`
+依赖放在仓库的 `.deps/`，不入库：obs 32.2.2 头文件快照、由 OBS 自带 DLL 生成的导入库、Qt 6.11.1 开发包。
+
+路径含中文时 moc 与 cl 会读错编码，构建前先映射一个 ASCII 盘符：
+
+```
+cmd /c subst X: "E:\DSH-Work\OBS插件"
+```
+
+配置、构建、安装（CMake 用 VS 自带的那份）：
+
+```
+& 'E:\Microsoft Visual Studio\18\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe' -S X:\Github\obs-replay-buffer-confirm -B X:\Github\obs-replay-buffer-confirm\build -G "Visual Studio 18 2026" -A x64 -DCMAKE_PREFIX_PATH=X:\Github\obs-replay-buffer-confirm\.deps\qt6
+& <同上 cmake> --build X:\Github\obs-replay-buffer-confirm\build --config RelWithDebInfo
+& <同上 cmake> --install X:\Github\obs-replay-buffer-confirm\build --config RelWithDebInfo --prefix X:\Github\obs-replay-buffer-confirm\release
+```
+
+部署：把 `release\obs-replay-buffer-confirm` 整个复制到 `C:\ProgramData\obs-studio\plugins\`，重启 OBS 生效。
+调试：OBS 安装目录的 `bin\64bit\obs64.exe` 作为调试目标，工作目录设为 `bin\64bit`。

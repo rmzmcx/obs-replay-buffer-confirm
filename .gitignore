@@ -1,5 +1,6 @@
 # 构建产物
 build/
+release/
 x64/
 obj/
 bin/
@@ -10,6 +11,9 @@ bin/
 *.lib
 *.log
 *.tlog
+
+# 依赖（obs 头文件快照、导入库、Qt6 开发包）
+.deps/
 
 # Visual Studio
 .vs/
