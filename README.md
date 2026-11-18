@@ -1,5 +1,7 @@
 # obs-replay-buffer-confirm
 
+[![release](https://img.shields.io/github/v/release/rmzmcx/obs-replay-buffer-confirm)](https://github.com/rmzmcx/obs-replay-buffer-confirm/releases/latest)
+
 **中文** | [English](README_en.md)
 
 给 OBS 的关闭回放缓存加一个二次确认弹窗，防止出现没有保存回放文件时误触关闭回放缓存按键导致丢失录像的情况。
@@ -12,7 +14,7 @@ OBS Studio 32.2.2，即 Steam 上对应的版本。头文件与接口都按 32.2
 
 ## 安装
 
-下载 Release 里的 zip，解压到 `C:\ProgramData\obs-studio\plugins\`，目录结构应为：
+下载 [Release](https://github.com/rmzmcx/obs-replay-buffer-confirm/releases/latest) 里的 zip，解压到 `C:\ProgramData\obs-studio\plugins\`，目录结构应为：
 
 ```
 plugins\obs-replay-buffer-confirm\bin\64bit\obs-replay-buffer-confirm.dll

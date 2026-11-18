@@ -1,5 +1,7 @@
 # obs-replay-buffer-confirm
 
+[![release](https://img.shields.io/github/v/release/rmzmcx/obs-replay-buffer-confirm)](https://github.com/rmzmcx/obs-replay-buffer-confirm/releases/latest)
+
 [中文](README.md) | **English**
 
 Adds a confirmation dialog when stopping the replay buffer in OBS, so a stray click cannot throw
@@ -14,7 +16,7 @@ OBS Studio 32.2.2, the version Steam ships. Headers and interfaces are built aga
 
 ## Installation
 
-Grab the zip from Releases and extract it into `C:\ProgramData\obs-studio\plugins\`. The layout
+Grab the zip from [Releases](https://github.com/rmzmcx/obs-replay-buffer-confirm/releases/latest) and extract it into `C:\ProgramData\obs-studio\plugins\`. The layout
 should be:
 
 ```
